@@ -1,31 +1,45 @@
 let capture;
 let timeWarpScan;
 let stripRatio = 0.001;
+let input;
+let img;
 
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
-  capture = createCapture(VIDEO);
-  capture.hide();
-  noStroke();
+  input = createFileInput(handleFile);
   timeWarpScan = new TimeWarpScan();
-  console.log(capture)
 }
 
 function draw() {
   background(0);
-  push();
+  // push();
   translate(width, 0);
   scale(-1, 1);
 
-  image(capture, 0, 0, width, (width * capture.height) / capture.width);
+  if (img){
+    image(img, 0, 0, width/6, (width * img.height) / (img.width*6))
+  }
   timeWarpScan.draw();
-  pop();
+  // pop();
 }
 
+function handleFile(file) {
+  print(file);
+  if (file.type === 'image') {
+    img = createImg(file.data, '');
+  } else {
+    img = null;
+  }
+}
+
+
+
 function keyPressed() {
-  if (key === ' ') {
+  console.log(key)
+  if (key === 'Enter') {
     window.setTimeout(() => {
       timeWarpScan.start();
+      console.log('start')
     }, 3000);
   }
 }
@@ -63,7 +77,6 @@ class TimeWarpScan {
     this.captureVideo();
     fill(color('#0EEE29'));
     rect(this.position * width, 0, 5, getDisplayHeight());
-    console.log('d') 
   }
 
   start() {
@@ -75,18 +88,17 @@ class TimeWarpScan {
   captureVideo() {
     // [1]
     if (!this.active) return;
-    
 
     // [2]
-    if (capture.loadedmetadata && this.position >= 0) {
+    if (img.loadedmetadata && this.position >= 0) {
       // [3]
-      let column = capture.get(
-        this.position * capture.width,
+      let column = img.get(
+        this.position * img.width,
         0,
-        Math.ceil(capture.width * stripRatio),
-        capture.height
+        Math.ceil(img.width * stripRatio),
+        img.height
       );
-      console.log('column', column)
+
       this.images.push(new TimeWarpImage(column, this.position));
 
       // [5]
@@ -99,8 +111,8 @@ class TimeWarpScan {
     }
 
     // [7]
-    this.images.forEach((img) => {
-      img.draw();
+    this.images.forEach((imga) => {
+      imga.draw();
     });
   }
 }
