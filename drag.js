@@ -28,9 +28,7 @@ var handleImage = function (e) {
     var reader = new FileReader();
     reader.onload = function(e) {      
         img.onload = function( ) {
-            canvas.width = img.width/2;
-            canvas.height = img.height/2;
-            // context.drawImage(img, 0, 0)
+            resizeCanvas(img.width/2, img.height/2)
             currentX = canvas.width/2;
             currentY = canvas.height/2;
             _Go();
@@ -96,7 +94,7 @@ class TimeWarpImage {
         
       const imageData = context.getImageData(0,0, canvas.width, canvas.height);
       // [2]
-      if ( this.position >= 0) {
+      if ( imageData && this.position > 0) {
           
         // [3]
         let column = get(
@@ -112,14 +110,21 @@ class TimeWarpImage {
       }
   
       //[6]
-      if (this.position > 1) {
+      if (this.position == 0) {
         this.done = true;
+        console.log('done')
+        var img = ctx.createImageData(w, h);
+        for (var i = img.data.length; --i >= 0; )
+        img.data[i] = 0;
+        ctx.putImageData(img, 100, 100);
+        context.drawImage(img, currentX-(img.width/8), currentY-(img.height/8),img.width/4, img.height/4 );
       }
   
       // [7]
       this.images.forEach((imga) => {
         imga.draw();
       });
+      console.log(this.position)
     }
   }
 
@@ -152,7 +157,29 @@ function _MouseEvents() {
       //currentY = mouseY;
     }
   };
+  canvas.touchstart = function(e) {
+    getTouchPos(canvas, e);
+    var mouseX = e.pageX - this.offsetLeft;
+    var mouseY = e.pageY - this.offsetTop;
+
+
+    if (mouseX >= (currentX - img.width/2) &&
+        mouseX <= (currentX + img.width/2) &&
+        mouseY >= (currentY - img.height/2) &&
+        mouseY <= (currentY + img.height/2)) {
+      isDraggable = true;
+      //currentX = mouseX;
+      //currentY = mouseY;
+    }
+  };
   canvas.onmousemove = function(e) {
+
+    if (isDraggable) {
+      currentX = e.pageX - this.offsetLeft;
+      currentY = e.pageY - this.offsetTop;
+    }
+  };
+  canvas.touchmove = function(e) {
 
     if (isDraggable) {
       currentX = e.pageX - this.offsetLeft;
@@ -162,13 +189,24 @@ function _MouseEvents() {
   canvas.onmouseup = function(e) {
     isDraggable = false;
   };
+  canvas.touchend = function(e) {
+    isDraggable = false;
+  };
   canvas.onmouseout = function(e) {
+    isDraggable = false;
+  };
+  canvas.touchcancel = function(e) {
     isDraggable = false;
   };
 }
 function _DrawImage() {
+    background(0);
+    // push();
+    // translate(width, 0);
+    // scale(-1, 1);
   context.drawImage(img, currentX-(img.width/8), currentY-(img.height/8),img.width/4, img.height/4 );
   timeWarpScan.draw();
+//   pop();
 }
 
 // ===========================================
