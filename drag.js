@@ -94,7 +94,7 @@ class TimeWarpImage {
         
       const imageData = context.getImageData(0,0, canvas.width, canvas.height);
       // [2]
-      if ( imageData && this.position > 0) {
+      if ( this.position >= 0.001) {
           
         // [3]
         let column = get(
@@ -110,14 +110,9 @@ class TimeWarpImage {
       }
   
       //[6]
-      if (this.position == 0) {
+      if (this.position < 0.001) {
         this.done = true;
         console.log('done')
-        var img = ctx.createImageData(w, h);
-        for (var i = img.data.length; --i >= 0; )
-        img.data[i] = 0;
-        ctx.putImageData(img, 100, 100);
-        context.drawImage(img, currentX-(img.width/8), currentY-(img.height/8),img.width/4, img.height/4 );
       }
   
       // [7]
